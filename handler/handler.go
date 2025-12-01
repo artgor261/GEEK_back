@@ -492,6 +492,32 @@ func (h *Handler) SentMassage(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// Testing
+// func (h *Handler) GetChatHistory(w http.ResponseWriter, r *http.Request) {
+// 	vars := mux.Vars(r)
+
+// 	threadID := vars["thread_id"]
+// 	if threadID == "" {
+// 		apiutils.WriteJSON(w, http.StatusBadRequest, errorResponse{"thread_id is required"})
+// 		return
+// 	}
+
+// 	messages, err := h.Openai.GetHistory(r.Context(), threadID)
+// 	if err != nil {
+// 		apiutils.WriteJSON(w, http.StatusInternalServerError, errorResponse{"failed to get response"})
+// 		return
+// 	}
+
+// 	if len(messages) == 0 {
+// 		apiutils.WriteJSON(w, http.StatusInternalServerError, errorResponse{"no response from assistant"})
+// 		return
+// 	}
+
+// 	apiutils.WriteJSON(w, http.StatusOK, map[string]interface{}{
+// 		"response": messages,
+// 	})
+// }
+
 func (h *Handler) NewDialoge(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 

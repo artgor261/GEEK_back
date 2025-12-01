@@ -1,7 +1,7 @@
 package main
 
 import (
-	"GEEK_back/client/openAI"
+	openai "GEEK_back/client/openAI"
 	_ "GEEK_back/docs"
 	"GEEK_back/router"
 	"GEEK_back/store"
@@ -52,7 +52,7 @@ func main() {
 	r := router.NewRouter(s, o)
 
 	server := &http.Server{
-		Addr:    host + ":" + port,
+		Addr:    localhost + ":" + port,
 		Handler: r,
 	}
 

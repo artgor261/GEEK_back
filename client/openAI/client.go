@@ -257,3 +257,35 @@ func (c *Client) GetMessages(ctx context.Context, threadID string, limit int) ([
 
 	return result.Data, nil
 }
+
+func (c *Client) GetHistory(threadID string) ([]Message, error) {
+	url := fmt.Sprintf("%s/threads/%s/messages?order=desc", c.BaseURL, threadID)
+	req, err := http.NewRequest("GET", url, nil)
+	
+	if err != nil {
+		return nil, err
+	}
+	
+	req.Header.Set("Authorization", "Bearer "+c.APIKey)
+	req.Header.Set("OpenAI-Beta", OpenAIBetaVersion)
+
+	resp, err := c.HTTP.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 300 {
+		b, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("openai http error: %d %s", resp.StatusCode, string(b))
+	}
+
+	var result struct {
+		Data []Message `json:"data"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, err
+	}
+
+	return result.Data, nil
+}

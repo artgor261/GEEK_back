@@ -1,13 +1,14 @@
 package router
 
 import (
-	"GEEK_back/client/openAI"
+	openai "GEEK_back/client/openAI"
 	"GEEK_back/handler"
 	mw "GEEK_back/middleware"
 	"GEEK_back/store"
+	"net/http"
+
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
-	"net/http"
 )
 
 func NewRouter(s *store.Store, o *openai.Client) http.Handler {
@@ -42,10 +43,14 @@ func NewRouter(s *store.Store, o *openai.Client) http.Handler {
 	protected.HandleFunc("/attempt/{attempt_id}/question/{question_position}/submit", h.PostQuestionAnswer).Methods("POST")
 	protected.HandleFunc("/attempt/{attempt_id}/submit", h.SubmitAttempt).Methods("POST")
 
+	// Testing
+	// protected.HandleFunc("/{thread_id}/history", h.GetChatHistory).Methods("GET")
+
 	ai := protected.PathPrefix("/attempt/{attempt_id}/question/{question_position}/ai").Subrouter()
 
 	ai.HandleFunc("/start", h.NewDialoge).Methods("POST")
 	ai.HandleFunc("/{thread_id}/send", h.SentMassage).Methods("POST")
+	
 
 	return mw.CORS(r)
 }
