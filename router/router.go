@@ -43,9 +43,6 @@ func NewRouter(s *store.Store, o *openai.Client) http.Handler {
 	protected.HandleFunc("/attempt/{attempt_id}/question/{question_position}/submit", h.PostQuestionAnswer).Methods("POST")
 	protected.HandleFunc("/attempt/{attempt_id}/submit", h.SubmitAttempt).Methods("POST")
 
-	// Testing
-	// protected.HandleFunc("/{thread_id}/history", h.GetChatHistory).Methods("GET")
-
 	ai := protected.PathPrefix("/attempt/{attempt_id}/question/{question_position}/ai").Subrouter()
 
 	ai.HandleFunc("/start", h.NewDialoge).Methods("POST")
