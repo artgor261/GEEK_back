@@ -258,7 +258,7 @@ func (c *Client) GetMessages(ctx context.Context, threadID string, limit int) ([
 	return result.Data, nil
 }
 
-func (c *Client) GetHistory(threadID string) ([]Message, error) {
+func (c *Client) GetHistory(threadID string) ([]*Message, error) {
 	url := fmt.Sprintf("%s/threads/%s/messages?order=desc", c.BaseURL, threadID)
 	req, err := http.NewRequest("GET", url, nil)
 	
@@ -281,7 +281,7 @@ func (c *Client) GetHistory(threadID string) ([]Message, error) {
 	}
 
 	var result struct {
-		Data []Message `json:"data"`
+		Data []*Message `json:"data"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, err
