@@ -57,6 +57,7 @@ type Answer struct {
 	QuestionID uint64    `json:"question_id"`
 	Text       string    `json:"text"`
 	RightOrNot bool      `json:"right_or_no"`
+	Thread	   string	 `json:"thread_id"`
 	CreatedAt  time.Time `json:"created_at"`
 }
 
