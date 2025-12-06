@@ -1,6 +1,7 @@
 package store
 
 import (
+	openai "GEEK_back/client/openAI"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -58,6 +59,7 @@ type Answer struct {
 	Text       string    `json:"text"`
 	RightOrNot bool      `json:"right_or_no"`
 	Thread	   string	 `json:"thread_id"`
+	History    []*openai.Message
 	CreatedAt  time.Time `json:"created_at"`
 }
 
