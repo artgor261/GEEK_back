@@ -457,6 +457,8 @@ func (s *Store) CreateAIThread(attemptID, questionPosition uint64, threadID stri
 		}
 	}
 
+	attempt.Answers[questionPosition-1].Thread = threadID
+
 	thread := &AIThread{
 		AttemptID: attemptID,
 		ThreadID:  threadID,
