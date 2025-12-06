@@ -5,6 +5,8 @@ import (
 	_ "GEEK_back/docs"
 	"GEEK_back/router"
 	"GEEK_back/store"
+
+	// "GEEK_back/validation"
 	"errors"
 	"net/http"
 	"os"
@@ -47,7 +49,13 @@ func main() {
 		log.Fatal().Msg("OPENAI_ASSISTANT_ID is not set")
 	}
 
+	gigaApiKey := os.Getenv("GIGACHAT_API_KEY")
+	if gigaApiKey == "" {
+		log.Fatal().Msg("GIGACHAT_API_KEY is not set")
+	}
+
 	o := openai.NewClient(apiKey, assistantID)
+	// giga := validation.NewGigaChat(gigaApiKey)
 
 	r := router.NewRouter(s, o)
 

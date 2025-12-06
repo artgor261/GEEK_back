@@ -373,24 +373,24 @@ func (s *Store) CreateAnswer(attemptID uint64, questionPos uint64, text string) 
 		return nil, errors.New("attempt not found")
 	}
 
-	test, ok := s.tests[attempt.TestID]
-	if !ok {
-		return nil, errors.New("test not found")
-	}
+	// test, ok := s.tests[attempt.TestID]
+	// if !ok {
+	// 	return nil, errors.New("test not found")
+	// }
 
 	if len(attempt.Answers) < int(questionPos-1) {
 		return nil, errors.New("question position out of range")
 	}
 
-	question := test.Questions[questionPos-1]
-	trueAnswer := question.TrueAnswer
+	// question := test.Questions[questionPos-1]
+	// trueAnswer := question.TrueAnswer
 
-	if text == trueAnswer {
-		attempt.Result += question.MaxScore
-		attempt.Answers[questionPos-1].RightOrNot = true
-	} else {
-		attempt.Answers[questionPos-1].RightOrNot = false
-	}
+	// if text == trueAnswer {
+	// 	attempt.Result += question.MaxScore
+	// 	attempt.Answers[questionPos-1].RightOrNot = true
+	// } else {
+	// 	attempt.Answers[questionPos-1].RightOrNot = false
+	// }
 
 	attempt.Answers[questionPos-1].Text = text
 	attempt.Answers[questionPos-1].CreatedAt = time.Now().UTC()
