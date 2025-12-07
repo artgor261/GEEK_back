@@ -464,10 +464,11 @@ func (h *Handler) SubmitAttempt(w http.ResponseWriter, r *http.Request) {
     		})
 			score, _ := strconv.Atoi(messages[i].Content)
 			answer.Score = score
+			attempt.Result += answer.Score
 		}
 	}
 
-	apiutils.WriteJSON(w, http.StatusOK, messages)
+	// apiutils.WriteJSON(w, http.StatusOK, messages)
 	apiutils.WriteJSON(w, http.StatusOK, attempt)
 }
 
@@ -588,7 +589,7 @@ func (h *Handler) NewDialoge(w http.ResponseWriter, r *http.Request) {
 }
 
 type Results struct {
-	Score   uint64          `json:"score"`
+	Score   int          `json:"score"`
 	Answers []*store.Answer `json:"answers"`
 }
 

@@ -57,10 +57,10 @@ type Answer struct {
 	ID         uint64    `json:"id"`
 	QuestionID uint64    `json:"question_id"`
 	Text       string    `json:"text"`
-	RightOrNot bool      `json:"right_or_no"`
+	// RightOrNot bool      `json:"right_or_no"`
 	Score	   int		 `json:"score"`
-	Thread	   string
-	History    []*openai.Message
+	Thread	   string	 `json:"-"`
+	History    []*openai.Message	`json:"-"`
 	CreatedAt  time.Time `json:"created_at"`
 }
 
@@ -70,7 +70,7 @@ type Attempt struct {
 	TestID     uint64    `json:"test_id"`
 	Status     string    `json:"status"`
 	Answers    []*Answer `json:"answers"`
-	Result     uint64    `json:"result"`
+	Result     int    `json:"result"`
 	StartedAt  time.Time `json:"started_at"`
 	FinishedAt time.Time `json:"finished_at"`
 }

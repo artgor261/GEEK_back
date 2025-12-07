@@ -43,6 +43,7 @@ func NewRouter(s *store.Store, o *openai.Client, g *validation.GigaChat) http.Ha
 	//protected.HandleFunc("/attempts/{attempt_id}/answers/{question_id}", h.GetQuestionAnswer).Methods("GET") // закомментировано
 	protected.HandleFunc("/attempt/{attempt_id}/question/{question_position}/submit", h.PostQuestionAnswer).Methods("POST")
 	protected.HandleFunc("/attempt/{attempt_id}/submit", h.SubmitAttempt).Methods("POST")
+	protected.HandleFunc("/attempt/{attempt_id}/result", h.GetAttemptResults).Methods("GET")
 
 	ai := protected.PathPrefix("/attempt/{attempt_id}/question/{question_position}/ai").Subrouter()
 
