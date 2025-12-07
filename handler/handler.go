@@ -452,18 +452,23 @@ func (h *Handler) SubmitAttempt(w http.ResponseWriter, r *http.Request) {
 		question := h.Store.GetQuestionByID(questionID, testID)
 		trueAnswer := question.TrueAnswer
 		userAnswer := answer.Text
-		history := answer.History
-		response, err := h.Gigachat.ValidAnswer(bearerToken, userAnswer, trueAnswer, question.Text, history)
-		if err != nil {
-			apiutils.WriteJSON(w, http.StatusInternalServerError, errorResponse{err.Error()})
-		}
-		for _, choice := range response {
-			messages = append(messages, &modelResponse{
-        		Role:    choice.Message.Role,
-        		Content: choice.Message.Content,
-    		})
-			score, _ := strconv.Atoi(messages[i].Content)
-			answer.Score = score
+		if userAnswer != "" {
+			history := answer.History
+			response, err := h.Gigachat.ValidAnswer(bearerToken, userAnswer, trueAnswer, question.Text, history)
+			if err != nil {
+				apiutils.WriteJSON(w, http.StatusInternalServerError, errorResponse{err.Error()})
+			}
+			for _, choice := range response {
+				messages = append(messages, &modelResponse{
+					Role:    choice.Message.Role,
+					Content: choice.Message.Content,
+				})
+				score, _ := strconv.Atoi(messages[i].Content)
+				answer.Score = score
+				attempt.Result += answer.Score
+			}
+		} else {
+			answer.Score = 0
 			attempt.Result += answer.Score
 		}
 	}
