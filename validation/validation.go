@@ -1,18 +1,21 @@
-// package validation
+package validation
 
-package main
+// package main
 
 import (
+	// "GEEK_back/store"
+	// openai "GEEK_back/client/openAI"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
-	"os"
+
+	// "os"
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/joho/godotenv"
+	// "github.com/joho/godotenv"
 )
 
 const gigaURL string = "https://gigachat.devices.sberbank.ru/api/v1/"
@@ -79,24 +82,28 @@ func (g *GigaChat) GetToken() (string, error) {
 	// return fmt.Sprintf("Authorization header: '%s'\n", req.Header.Get("Authorization")), nil
 }
 
-func (g *GigaChat) ValidAnswer() ([]Choices, error) {
+func (g *GigaChat) ValidAnswer(token, userAnswer, rightAnswer string, history []Message) ([]Choices, error) {
 	url := g.BaseURL+"/chat/completions"
-	bearerToken, _ := g.GetToken()
+	// bearerToken, _ := g.GetToken()
 	// var modelResponse Choices
 
 	var modelResponse struct {
 		Choice	[]Choices	`json:"choices"`
 	}
 	
-	reader := strings.NewReader(`{
+	reader := strings.NewReader(fmt.Sprintf(`{
 	"model": "GigaChat-2-Max",
 	"messages": [
 		{
+			"role": "system",
+			"content": "Ты учитель истории и литературы одновременно."
+		},
+		{
 			"role": "user",
-			"content": "Привет, кто тебя создал?"
+			"content": "Что завоевал %s? Что написал %s?"
 		}
 	]
-	}`)
+	}`, userAnswer, rightAnswer))
 	
 	req, err := http.NewRequest("POST", url, reader)
 	if err != nil {
@@ -105,7 +112,7 @@ func (g *GigaChat) ValidAnswer() ([]Choices, error) {
 
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", "application/json")
-	req.Header.Add("Authorization", "Bearer "+bearerToken)
+	req.Header.Add("Authorization", "Bearer "+token)
 
 	resp, err := g.HTTP.Do(req)
 	if err != nil {
@@ -120,22 +127,21 @@ func (g *GigaChat) ValidAnswer() ([]Choices, error) {
 	return modelResponse.Choice, nil
 }
 
-func main() {
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Println(err)
-	}
+// func main() {
+// 	err := godotenv.Load()
+// 	if err != nil {
+// 		fmt.Println(err)
+// 	}
 	
-	giga := &GigaChat{
-		APIKey: os.Getenv("GIGACHAT_API_KEY"),
-		BaseURL: "https://gigachat.devices.sberbank.ru/api/v1/",
-		HTTP: &http.Client{},
-	}
+// 	giga := &GigaChat{
+// 		APIKey: os.Getenv("GIGACHAT_API_KEY"),
+// 		BaseURL: "https://gigachat.devices.sberbank.ru/api/v1/",
+// 		HTTP: &http.Client{},
+// 	}
 
-	// token, err := giga.GetToken()
-	// if err != nil {
-	// 	fmt.Printf("Error: %v", err)
-	// }
+// 	token, err := giga.GetToken()
+// 	userAnswer := "Наполеон"
+// 	rightAnswer := "Пушкин"
 
-	fmt.Println(giga.ValidAnswer())
-}
+// 	fmt.Println(giga.ValidAnswer(token, userAnswer, rightAnswer))
+// }

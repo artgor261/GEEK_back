@@ -5,14 +5,15 @@ import (
 	"GEEK_back/handler"
 	mw "GEEK_back/middleware"
 	"GEEK_back/store"
+	"GEEK_back/validation"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
-func NewRouter(s *store.Store, o *openai.Client) http.Handler {
-	h := handler.NewHandler(s, o)
+func NewRouter(s *store.Store, o *openai.Client, g *validation.GigaChat) http.Handler {
+	h := handler.NewHandler(s, o, g)
 
 	r := mux.NewRouter()
 

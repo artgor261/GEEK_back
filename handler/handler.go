@@ -5,6 +5,7 @@ import (
 	openai "GEEK_back/client/openAI"
 	mw "GEEK_back/middleware"
 	"GEEK_back/store"
+	"GEEK_back/validation"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -20,18 +21,20 @@ import (
 const sessionDuration = 24 * time.Hour
 
 type Handler struct {
-	Store  *store.Store
-	Openai *openai.Client
+	Store  		*store.Store
+	Openai 		*openai.Client
+	Gigachat	*validation.GigaChat
 }
 
 type errorResponse struct {
 	Error string `json:"error"`
 }
 
-func NewHandler(s *store.Store, o *openai.Client) *Handler {
+func NewHandler(s *store.Store, o *openai.Client, g *validation.GigaChat) *Handler {
 	return &Handler{
 		Store:  s,
 		Openai: o,
+		Gigachat: g,
 	}
 }
 
@@ -418,9 +421,19 @@ func (h *Handler) SubmitAttempt(w http.ResponseWriter, r *http.Request) {
 	}
 
 	attempt, err := h.Store.SubmitAttempt(attemptID)
-
+	
 	if err != nil {
 		apiutils.WriteJSON(w, http.StatusInternalServerError, errorResponse{err.Error()})
+	}
+
+	if answersCount := len(attempt.Answers); answersCount != 0 {
+		bearerToken = ""
+		answers := attempt.Answers
+		for i := 0; i < answersCount; i++ {
+			if answers[i].QuestionID == 1 {
+				bearerToken 
+			}
+		} 
 	}
 
 	apiutils.WriteJSON(w, http.StatusOK, attempt)

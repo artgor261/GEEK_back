@@ -300,6 +300,22 @@ func (s *Store) TestById(testId uint64) (*Test, bool) {
 	return result, ok
 }
 
+func (s *Store) GetQuestionByID(questionID, testID uint64) *Question {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	var result *Question
+	test := s.tests[testID]
+	for i := 0; i < len(test.Questions); i++ {
+		curr_question := test.Questions[i]
+		if curr_question.ID == questionID {
+			result = curr_question
+		}
+	}
+
+	return result
+}
+
 func (s *Store) GetAttemptQuestions(attemptId uint64) ([]*Question, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()

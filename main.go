@@ -6,7 +6,7 @@ import (
 	"GEEK_back/router"
 	"GEEK_back/store"
 
-	// "GEEK_back/validation"
+	"GEEK_back/validation"
 	"errors"
 	"net/http"
 	"os"
@@ -55,9 +55,9 @@ func main() {
 	}
 
 	o := openai.NewClient(apiKey, assistantID)
-	// giga := validation.NewGigaChat(gigaApiKey)
+	g := validation.NewGigaChat(gigaApiKey)
 
-	r := router.NewRouter(s, o)
+	r := router.NewRouter(s, o, g)
 
 	server := &http.Server{
 		Addr:    localhost + ":" + port,
