@@ -414,6 +414,11 @@ func (h *Handler) PostQuestionAnswer(w http.ResponseWriter, r *http.Request) {
 // @Router /attempt/{attempt_id}/submit [post]
 func (h *Handler) SubmitAttempt(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
+	var bearerToken string
+	type modelResponse struct {
+		Role	string
+		Content	string
+	}
 
 	attemptID, err := strconv.ParseUint(vars["attempt_id"], 10, 64)
 	if err != nil {
@@ -426,16 +431,43 @@ func (h *Handler) SubmitAttempt(w http.ResponseWriter, r *http.Request) {
 		apiutils.WriteJSON(w, http.StatusInternalServerError, errorResponse{err.Error()})
 	}
 
-	if answersCount := len(attempt.Answers); answersCount != 0 {
-		bearerToken = ""
-		answers := attempt.Answers
-		for i := 0; i < answersCount; i++ {
-			if answers[i].QuestionID == 1 {
-				bearerToken 
-			}
-		} 
+	answersCount := len(attempt.Answers)
+	if answersCount == 0 {
+		apiutils.WriteJSON(w, http.StatusInternalServerError, errorResponse{"There is no answers"})
 	}
 
+	answers := attempt.Answers
+	
+	bearerToken, err = h.Gigachat.GetToken()
+	if err != nil {
+		apiutils.WriteJSON(w, http.StatusInternalServerError, errorResponse{err.Error()})
+	}
+
+	var messages []*modelResponse
+	
+	for i := 0; i < answersCount; i++ {
+		answer := answers[i]
+		testID := attempt.TestID
+		questionID := answer.QuestionID
+		question := h.Store.GetQuestionByID(questionID, testID)
+		trueAnswer := question.TrueAnswer
+		userAnswer := answer.Text
+		history := answer.History
+		response, err := h.Gigachat.ValidAnswer(bearerToken, userAnswer, trueAnswer, question.Text, history)
+		if err != nil {
+			apiutils.WriteJSON(w, http.StatusInternalServerError, errorResponse{err.Error()})
+		}
+		for _, choice := range response {
+			messages = append(messages, &modelResponse{
+        		Role:    choice.Message.Role,
+        		Content: choice.Message.Content,
+    		})
+			score, _ := strconv.Atoi(messages[i].Content)
+			answer.Score = score
+		}
+	}
+
+	apiutils.WriteJSON(w, http.StatusOK, messages)
 	apiutils.WriteJSON(w, http.StatusOK, attempt)
 }
 

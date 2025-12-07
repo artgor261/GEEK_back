@@ -1,21 +1,16 @@
 package validation
 
-// package main
-
 import (
-	// "GEEK_back/store"
-	// openai "GEEK_back/client/openAI"
+	openai "GEEK_back/client/openAI"
+	"bytes"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
-
-	// "os"
 	"strings"
 
 	"github.com/google/uuid"
-	// "github.com/joho/godotenv"
 )
 
 const gigaURL string = "https://gigachat.devices.sberbank.ru/api/v1/"
@@ -36,13 +31,13 @@ type Message struct {
 	Content	string 	`json:"content"`
 }
 
-type Choices struct {
-	Messages	Message	`json:"message"`
+type Choice struct {
+    Message Message `json:"message"`
 }
 
-// type Choices struct {
-// 	Messages	[]*Message	`json:"message"`
-// }
+type ChatCompletionResponse struct {
+    Choices []Choice `json:"choices"`
+}
 
 func NewGigaChat(apiKey string) *GigaChat {
 	return &GigaChat{APIKey: apiKey, BaseURL: gigaURL, HTTP: &http.Client{}}
@@ -78,34 +73,50 @@ func (g *GigaChat) GetToken() (string, error) {
 	}
 
 	return token.Token, nil
-
-	// return fmt.Sprintf("Authorization header: '%s'\n", req.Header.Get("Authorization")), nil
 }
 
-func (g *GigaChat) ValidAnswer(token, userAnswer, rightAnswer string, history []Message) ([]Choices, error) {
+func (g *GigaChat) ValidAnswer(token, userAnswer, rightAnswer, question string, history []*openai.Message) ([]Choice, error) {
 	url := g.BaseURL+"/chat/completions"
-	// bearerToken, _ := g.GetToken()
-	// var modelResponse Choices
+	
+	systemPromt := `"\nТы - эксперт, который проверяет правильность \
+	решения теста. Тест является не обычным. На вопросы теста пользователь должен \
+	отвечать с помощью LLM, которая интегрирована в приложение. Вопросы подобраны \
+	специально так, чтобы пользователь не мог просто скопировать вопрос и отправить его \
+	в модель, а затем получить ответ. При таком подходе LLM не сможет правильно ответить \
+	на вопрос, поэтому пользователь должен показать все свои умения в промт-инжиниринге. \
+	Твоя задача заключается в том, чтобы проверить насколько пользователь ответил правильно. \
+	Ты получишь сам вопрос из теста, эталонный ответ на него, ответ пользователя, а так же \
+	историю диалога пользователя с LLM. Ответ пользователя необязательно должен точь в точь \
+	совпадать с эталонным ответом, поэтому ты должен оценить насколько пользователь близок \
+	к правильному ответу. Так же не забывай оценить ещё и историю диалога \
+	пользователя с моделью. Если диалог с ней никак не связан с решением вопроса или если диалог \
+	пуст, то отнимай за это баллы. Верни ответ в формате 10-бальной оценки. \
+	Больше ничего писать в ответе не нужно.`
 
-	var modelResponse struct {
-		Choice	[]Choices	`json:"choices"`
-	}
-	
-	reader := strings.NewReader(fmt.Sprintf(`{
-	"model": "GigaChat-2-Max",
-	"messages": [
-		{
-			"role": "system",
-			"content": "Ты учитель истории и литературы одновременно."
+	userPromt := fmt.Sprintf(`
+		"\nВопрос: %s\nЭталонный ответ: %s\nОтвет пользователя: %s\ 
+		\nИстория диалога с LLM: %v"`,
+		 question, rightAnswer, userAnswer, history)
+
+	var modelResponse ChatCompletionResponse
+
+	body := map[string]interface{}{
+		"model": "GigaChat-2-Max",
+		"messages": []map[string]string{
+			{
+				"role": "system",
+				"content": fmt.Sprintf("System Promt: %s", systemPromt),
+			},
+			{
+				"role": "user",
+				"content": fmt.Sprintf("User Promt: %s", userPromt),
+			},
 		},
-		{
-			"role": "user",
-			"content": "Что завоевал %s? Что написал %s?"
-		}
-	]
-	}`, userAnswer, rightAnswer))
+	}
+
+	payload, _ := json.Marshal(body)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(payload))
 	
-	req, err := http.NewRequest("POST", url, reader)
 	if err != nil {
 		return nil, err
 	}
@@ -124,24 +135,5 @@ func (g *GigaChat) ValidAnswer(token, userAnswer, rightAnswer string, history []
 		return nil, err
 	}
 
-	return modelResponse.Choice, nil
+	return modelResponse.Choices, nil
 }
-
-// func main() {
-// 	err := godotenv.Load()
-// 	if err != nil {
-// 		fmt.Println(err)
-// 	}
-	
-// 	giga := &GigaChat{
-// 		APIKey: os.Getenv("GIGACHAT_API_KEY"),
-// 		BaseURL: "https://gigachat.devices.sberbank.ru/api/v1/",
-// 		HTTP: &http.Client{},
-// 	}
-
-// 	token, err := giga.GetToken()
-// 	userAnswer := "Наполеон"
-// 	rightAnswer := "Пушкин"
-
-// 	fmt.Println(giga.ValidAnswer(token, userAnswer, rightAnswer))
-// }

@@ -58,6 +58,7 @@ type Answer struct {
 	QuestionID uint64    `json:"question_id"`
 	Text       string    `json:"text"`
 	RightOrNot bool      `json:"right_or_no"`
+	Score	   int		 `json:"score"`
 	Thread	   string
 	History    []*openai.Message
 	CreatedAt  time.Time `json:"created_at"`
