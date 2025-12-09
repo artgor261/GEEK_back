@@ -60,7 +60,7 @@ func main() {
 	r := router.NewRouter(s, o, g)
 
 	server := &http.Server{
-		Addr:    localhost + ":" + port,
+		Addr:    host + ":" + port,
 		Handler: r,
 	}
 
