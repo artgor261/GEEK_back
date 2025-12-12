@@ -3,7 +3,8 @@ package validation
 import (
 	openai "GEEK_back/client/openAI"
 	"bytes"
-	"crypto/tls"
+
+	// "crypto/tls"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -60,7 +61,7 @@ func (g *GigaChat) GetToken() (string, error) {
 	req.Header.Set("RqUID", uuid.New().String())
 	req.Header.Set("Authorization", "Basic "+g.APIKey)
 
-	g.HTTP.Transport = &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true,}}
+	// g.HTTP.Transport = &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true,}}
 
 	resp, err := g.HTTP.Do(req)
     if err != nil {
